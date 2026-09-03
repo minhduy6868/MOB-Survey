@@ -1,47 +1,20 @@
 # Trovey
 
-PWA phỏng vấn hiện trường về thói quen giao dịch trên thế giới.  
-Offline-first: phiếu lưu trên máy (Hive / IndexedDB), có mạng thì ghi vào Cloudflare KV.
+**Course:** Cross-Platform Mobile App Development (VKU)  
+**Mini-Project:** 1 — Week 3 PWA  
+**Student:** Nguyễn Minh Duy — 23IT038
 
-**Live:** https://app.puretrovey.net/  
-**GitHub:** https://github.com/minhduy6868/MOB-Survey
-
-Người điều tra: Nguyễn Minh Duy · [minhduyy.id.vn](https://minhduyy.id.vn) · 23IT038
-
-## Tính năng
-
-- Cài ra màn hình chính (`standalone`)
-- Điền phiếu khi mất mạng, gửi lại khi có mạng
-- Service Worker đủ 5 chiến lược cache
-- Đồng bộ Cloudflare KV, Sheet chỉ là bản sao
-- Tiếng Việt / English, sáng / tối
-
-## Stack
-
-| Lớp | Công cụ |
+| Deliverable | URL |
 |---|---|
-| UI | Flutter web |
-| Offline | Hive (IndexedDB trên web) |
-| PWA | `app/web/manifest.json` + `sw.js` viết tay |
-| Host | Cloudflare Pages |
-| Database | Cloudflare KV `TROVEY_RECORDS` |
-| Bản sao | Google Sheet kéo từ `/api/records` |
+| Live demo | https://app.puretrovey.net/ |
+| GitHub | https://github.com/minhduy6868/MOB-Survey |
+| Technical report | [docs/Mini-Project-1-Technical-Report.pdf](docs/Mini-Project-1-Technical-Report.pdf) |
 
-## Cấu trúc
-
-```
-app/                 Flutter PWA + Android (tuỳ chọn)
-  lib/               Màn hình, form, Hive, sync
-  web/               Manifest, service worker, icon
-functions/           Cloudflare Pages Functions
-  api/sync           Ghi phiếu vào KV
-  api/records        JSON / CSV
-sheets/Code.gs       Apps Script làm đẹp Sheet
-```
+PWA phỏng vấn hiện trường về thói quen giao dịch. Phiếu lưu local bằng Hive (IndexedDB trên web). Khi có mạng, client gửi `POST /api/sync` vào Cloudflare KV. Google Sheet đọc `GET /api/records`.
 
 ## Chạy local
 
-Cần [Flutter](https://docs.flutter.dev/get-started/install) ổn định.
+Cần Flutter SDK.
 
 ```bash
 cd app
@@ -49,28 +22,40 @@ flutter pub get
 flutter run -d chrome
 ```
 
-Local không có API. Để phiếu lên cloud khi chạy máy:
+Máy local không chạy Functions. Muốn sync lên cloud:
 
 ```bash
 flutter run -d chrome --dart-define=SYNC_URL=https://app.puretrovey.net/api/sync
 ```
 
-## PWA (Week 3)
+## Cấu trúc
 
-| Tiêu chí | File |
+```
+app/lib/             UI, Hive, hàng đợi sync
+app/web/             manifest.json, sw.js, icon
+functions/api/       /api/sync, /api/records
+sheets/Code.gs       kéo dữ liệu KV vào Sheet
+```
+
+## Offline và cache
+
+| Thành phần | Vị trí |
 |---|---|
-| Manifest standalone | `app/web/manifest.json` |
-| Icon 192 / 512 + maskable | `app/web/icons/` |
-| SW install → activate → fetch | `app/web/sw.js` |
-| 5 chiến lược cache | cache-first, network-first, SWR, cache-only, network-only |
-| Offline data | Hive box `tickets-v3` |
-| Background Sync | tag `trovey-sync` trong `sw.js` + `install.js` |
+| Manifest `display: standalone` | `app/web/manifest.json` |
+| Service Worker | `app/web/sw.js` (`trovey-shell-v9`) |
+| Cache-First | shell, JS, icon |
+| Network-First | `/survey-template.json` |
+| Stale-While-Revalidate | `/sw-stats.json` |
+| Cache-Only | `/offline` |
+| Network-Only | `/api/*` |
+| Hive | box `tickets-v3`, `settings`, `meta` |
+| Background Sync | tag `trovey-sync` |
 
-Chrome → DevTools → Application: Manifest + Service Workers (`trovey-shell-v9`).
+Chrome DevTools → Application: Manifest, Service Workers, Cache Storage, IndexedDB.
 
 ## Deploy
 
-Không commit token. Trong PowerShell:
+Không commit token.
 
 ```powershell
 cd app
@@ -79,19 +64,17 @@ cd ..
 npx wrangler pages deploy app/build/web --project-name trovey
 ```
 
-Chạy lệnh deploy từ thư mục gốc để Wrangler biên dịch `functions/`.
+Chạy từ thư mục gốc để Wrangler biên dịch `functions/`.
 
-## Google Sheet (bản sao)
+## Google Sheet
 
-Dữ liệu gốc ở Cloudflare, không ở Sheet.
-
-1. Dán `sheets/Code.gs` vào Extensions → Apps Script.
-2. Chạy `beautifyAndSync` một lần (cho phép quyền).
-3. Chạy `installTrigger` nếu muốn Sheet tự cập nhật.
+1. Dán `sheets/Code.gs` vào Apps Script.
+2. Chạy `beautifyAndSync`.
+3. (Tuỳ chọn) `installTrigger`.
 
 CSV: https://app.puretrovey.net/api/records?format=csv
 
-## Android (thêm, không thay PWA)
+## Android (ngoài phạm vi tuần 3)
 
 ```bash
 cd app

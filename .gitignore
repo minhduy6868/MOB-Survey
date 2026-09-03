@@ -38,6 +38,8 @@ logos/master-1024.png
 app/web/downloads/*.apk
 app/assets/brand/lockup.png
 DESIGN.md
+docs/evidence/
+docs/build_report.py
 
 # Android local / generated
 app/android/local.properties
