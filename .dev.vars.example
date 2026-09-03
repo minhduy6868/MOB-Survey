@@ -1,0 +1,2 @@
+# Copy to .dev.vars for local wrangler pages dev. Do not commit the real URL.
+SHEETS_WEBHOOK=

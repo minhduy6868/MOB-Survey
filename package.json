@@ -1,0 +1,11 @@
+{
+  "name": "trovey",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "deploy": "wrangler pages deploy app/build/web --project-name trovey"
+  },
+  "devDependencies": {
+    "wrangler": "^4.128.0"
+  }
+}
