@@ -34,7 +34,7 @@ class FieldBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.only(bottom: TroveySpace.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -46,10 +46,10 @@ class FieldBlock extends StatelessWidget {
           _control(context),
           if (error)
             Padding(
-              padding: const EdgeInsets.only(top: 8),
+              padding: const EdgeInsets.only(top: TroveySpace.sm),
               child: Text(
                 tr(locale, 'required'),
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: TroveyColors.stamp),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.error),
               ),
             ),
         ],
@@ -63,6 +63,12 @@ class FieldBlock extends StatelessWidget {
         return _text(false);
       case FieldType.long:
         return _text(true);
+      case FieldType.phone:
+        return TextFormField(
+          initialValue: '${answers[field.id] ?? ''}',
+          keyboardType: TextInputType.phone,
+          onChanged: onChanged,
+        );
       case FieldType.number:
         return TextFormField(
           initialValue: '${answers[field.id] ?? ''}',
@@ -70,27 +76,39 @@ class FieldBlock extends StatelessWidget {
           inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
           onChanged: onChanged,
         );
+      case FieldType.dropdown:
+        final current = '${answers[field.id] ?? ''}';
+        return DropdownMenu<String>(
+          initialSelection: current.isEmpty ? null : current,
+          hintText: tr(locale, 'chooseCountry'),
+          enableFilter: true,
+          requestFocusOnTap: true,
+          expandedInsets: EdgeInsets.zero,
+          dropdownMenuEntries: field.options
+              .map((opt) => DropdownMenuEntry<String>(value: opt.value, label: opt.label(locale)))
+              .toList(),
+          onSelected: (value) {
+            if (value != null) onChanged(value);
+          },
+        );
       case FieldType.single:
         return Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: TroveySpace.sm,
+          runSpacing: TroveySpace.sm,
           children: field.options.map((opt) {
             final selected = answers[field.id] == opt.value;
             return ChoiceChip(
               label: Text(opt.label(locale)),
               selected: selected,
               onSelected: (_) => onChanged(opt.value),
-              selectedColor: TroveyColors.brass.withValues(alpha: 0.25),
-              side: BorderSide(color: selected ? TroveyColors.brass : TroveyColors.line),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             );
           }).toList(),
         );
       case FieldType.multi:
         final selected = List<String>.from(answers[field.id] as List? ?? const []);
         return Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: TroveySpace.sm,
+          runSpacing: TroveySpace.sm,
           children: field.options.map((opt) {
             final on = selected.contains(opt.value);
             return FilterChip(
@@ -105,9 +123,6 @@ class FieldBlock extends StatelessWidget {
                 }
                 onChanged(copy);
               },
-              selectedColor: TroveyColors.brass.withValues(alpha: 0.25),
-              side: BorderSide(color: on ? TroveyColors.brass : TroveyColors.line),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             );
           }).toList(),
         );
@@ -162,12 +177,17 @@ class _GpsField extends StatelessWidget {
       children: [
         if (summary.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Text(summary, style: TroveyTheme.mono(size: 12, color: TroveyColors.cleared)),
+            padding: const EdgeInsets.only(bottom: TroveySpace.sm),
+            child: Text(
+              summary,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).extension<AppColors>()?.success ?? Theme.of(context).colorScheme.primary,
+                  ),
+            ),
           ),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: TroveySpace.sm,
+          runSpacing: TroveySpace.sm,
           children: [
             GhostButton(
               label: tr(locale, 'captureGps'),
@@ -195,7 +215,7 @@ class _GpsField extends StatelessWidget {
         ),
         if (gps == null)
           Padding(
-            padding: const EdgeInsets.only(top: 8),
+            padding: const EdgeInsets.only(top: TroveySpace.sm),
             child: TextFormField(
               initialValue: '${answers['gpsSkipped'] ?? ''}',
               decoration: InputDecoration(hintText: tr(locale, 'skipReason')),
@@ -225,11 +245,11 @@ class _PhotoField extends StatelessWidget {
       children: [
         if (photoB64 != null && photoB64!.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.only(bottom: TroveySpace.sm),
             child: Image.memory(base64Decode(photoB64!), height: 120, fit: BoxFit.cover),
           ),
         Wrap(
-          spacing: 8,
+          spacing: TroveySpace.sm,
           children: [
             GhostButton(
               label: tr(locale, 'takePhoto'),

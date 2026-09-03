@@ -1,75 +1,49 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
+import '../data/collector.dart';
 import '../data/i18n.dart';
+import '../data/install.dart';
 import '../data/models.dart';
 import '../data/store.dart';
 import '../theme/tokens.dart';
 import 'brand.dart';
 
-class AppHeader extends StatelessWidget {
-  const AppHeader({super.key, required this.store});
+class AppHeader extends StatelessWidget implements PreferredSizeWidget {
+  const AppHeader({super.key, required this.store, this.title, this.leading});
   final TroveyStore store;
+  final String? title;
+  final Widget? leading;
+
+  @override
+  Size get preferredSize => const Size.fromHeight(64);
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final online = store.online;
-    final queued = store.queueCount;
-    return Material(
-      color: theme.scaffoldBackgroundColor,
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(TroveySpace.md, TroveySpace.sm, TroveySpace.md, TroveySpace.sm),
-          child: Row(
-            children: [
-              const BrandLockup(compact: true),
-              const Spacer(),
-              if (queued > 0) ...[
-                Text(
-                  '${store.t('queue')} $queued',
-                  style: theme.textTheme.labelMedium,
-                ),
-                const SizedBox(width: TroveySpace.sm),
-              ],
-              _LiveChip(online: online, label: store.t(online ? 'online' : 'offline')),
-            ],
+    final extras = theme.extension<AppColors>();
+    final live = online ? (extras?.success ?? TroveyColors.cleared) : theme.colorScheme.error;
+    return AppBar(
+      leading: leading ?? const Padding(
+        padding: EdgeInsets.only(left: TroveySpace.sm),
+        child: Center(child: BrandMark(size: 32)),
+      ),
+      leadingWidth: leading == null ? 48 : 56,
+      title: Text(title ?? 'Trovey'),
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: TroveySpace.md),
+          child: Chip(
+            visualDensity: VisualDensity.compact,
+            avatar: Icon(Icons.circle, size: 10, color: live),
+            label: Text(store.t(online ? 'online' : 'offline')),
           ),
         ),
-      ),
+      ],
     );
   }
 }
 
-class _LiveChip extends StatelessWidget {
-  const _LiveChip({required this.online, required this.label});
-  final bool online;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = online ? TroveyColors.cleared : TroveyColors.stamp;
-    return Container(
-      constraints: const BoxConstraints(minHeight: 32),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-          const SizedBox(width: 8),
-          Text(label, style: TroveyTheme.mono(size: 11, color: color)),
-        ],
-      ),
-    );
-  }
-}
-
-/// Kept for existing call sites.
 class StatusTape extends StatelessWidget {
   const StatusTape({super.key, required this.store});
   final TroveyStore store;
@@ -78,51 +52,22 @@ class StatusTape extends StatelessWidget {
   Widget build(BuildContext context) => AppHeader(store: store);
 }
 
-class TicketCard extends StatelessWidget {
-  const TicketCard({super.key, required this.stub, required this.child, this.onTap});
+class PadCard extends StatelessWidget {
+  const PadCard({super.key, required this.child, this.onTap});
 
-  final String stub;
   final Widget child;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final card = Material(
-      color: theme.colorScheme.surface,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: theme.colorScheme.outline.withValues(alpha: 0.9)),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        overlayColor: WidgetStatePropertyAll(theme.colorScheme.primary.withValues(alpha: 0.06)),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(width: 4, color: theme.colorScheme.primary),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(TroveySpace.md),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(stub, style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.primary)),
-                      const SizedBox(height: TroveySpace.sm),
-                      child,
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+    final body = Padding(
+      padding: const EdgeInsets.all(TroveySpace.md),
+      child: child,
     );
-    return card;
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: onTap == null ? body : InkWell(onTap: onTap, child: body),
+    );
   }
 }
 
@@ -133,29 +78,24 @@ class StatusStamp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final extras = Theme.of(context).extension<AppColors>();
     final color = switch (status) {
-      ResponseStatus.synced => TroveyColors.cleared,
-      ResponseStatus.queued || ResponseStatus.syncing => TroveyColors.dawn,
-      ResponseStatus.failed => TroveyColors.stamp,
-      ResponseStatus.draft => TroveyColors.muted,
+      ResponseStatus.synced => extras?.success ?? TroveyColors.cleared,
+      ResponseStatus.queued || ResponseStatus.syncing => extras?.warning ?? TroveyColors.dawn,
+      ResponseStatus.failed => Theme.of(context).colorScheme.error,
+      ResponseStatus.draft => Theme.of(context).colorScheme.onSurfaceVariant,
     };
-    return Container(
-      constraints: const BoxConstraints(minHeight: 28),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color),
-      ),
-      child: Text(
-        statusLabel(locale, status.name).toUpperCase(),
-        style: TroveyTheme.mono(size: 11, color: color),
-      ),
+    return Chip(
+      visualDensity: VisualDensity.compact,
+      label: Text(statusLabel(locale, status.name)),
+      labelStyle: Theme.of(context).textTheme.labelMedium?.copyWith(color: color),
+      side: BorderSide(color: color),
+      backgroundColor: color.withValues(alpha: 0.08),
     );
   }
 }
 
-class PrimaryButton extends StatefulWidget {
+class PrimaryButton extends StatelessWidget {
   const PrimaryButton({super.key, required this.label, required this.onPressed, this.busy = false});
 
   final String label;
@@ -163,128 +103,24 @@ class PrimaryButton extends StatefulWidget {
   final bool busy;
 
   @override
-  State<PrimaryButton> createState() => _PrimaryButtonState();
-}
-
-class _PrimaryButtonState extends State<PrimaryButton> {
-  bool _hover = false;
-  bool _down = false;
-  bool _focus = false;
-
-  @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final enabled = widget.onPressed != null && !widget.busy;
-    final primary = theme.colorScheme.primary;
-    final bg = !enabled
-        ? TroveyColors.muted
-        : _down
-            ? TroveyColors.ink
-            : _hover
-                ? const Color(0xFF0B5C74)
-                : primary;
-    return FocusableActionDetector(
-      enabled: enabled,
-      mouseCursor: enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
-      onShowHoverHighlight: (v) => setState(() => _hover = v),
-      onShowFocusHighlight: (v) => setState(() => _focus = v),
-      actions: {
-        ActivateIntent: CallbackAction<ActivateIntent>(
-          onInvoke: (_) {
-            widget.onPressed?.call();
-            return null;
-          },
-        ),
-      },
-      child: GestureDetector(
-        onTapDown: enabled ? (_) => setState(() => _down = true) : null,
-        onTapUp: enabled ? (_) => setState(() => _down = false) : null,
-        onTapCancel: () => setState(() => _down = false),
-        onTap: enabled
-            ? () {
-                HapticFeedback.selectionClick();
-                widget.onPressed?.call();
-              }
-            : null,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOut,
-          constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
-          alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          decoration: BoxDecoration(
-            color: bg.withValues(alpha: enabled ? 1 : 0.45),
-            borderRadius: BorderRadius.circular(14),
-            border: _focus ? Border.all(color: theme.colorScheme.secondary, width: 2) : null,
-          ),
-          child: widget.busy
-              ? SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                )
-              : Text(
-                  widget.label,
-                  style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.onPrimary),
-                ),
-        ),
-      ),
+    return FilledButton(
+      onPressed: busy ? null : onPressed,
+      child: busy
+          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator.adaptive(strokeWidth: 2))
+          : Text(label),
     );
   }
 }
 
-class GhostButton extends StatefulWidget {
+class GhostButton extends StatelessWidget {
   const GhostButton({super.key, required this.label, required this.onPressed});
   final String label;
   final VoidCallback? onPressed;
 
   @override
-  State<GhostButton> createState() => _GhostButtonState();
-}
-
-class _GhostButtonState extends State<GhostButton> {
-  bool _hover = false;
-  bool _focus = false;
-
-  @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final enabled = widget.onPressed != null;
-    return FocusableActionDetector(
-      enabled: enabled,
-      mouseCursor: enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
-      onShowHoverHighlight: (v) => setState(() => _hover = v),
-      onShowFocusHighlight: (v) => setState(() => _focus = v),
-      actions: {
-        ActivateIntent: CallbackAction<ActivateIntent>(
-          onInvoke: (_) {
-            widget.onPressed?.call();
-            return null;
-          },
-        ),
-      },
-      child: GestureDetector(
-        onTap: enabled ? widget.onPressed : null,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 160),
-          constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
-          alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            color: _hover ? theme.colorScheme.primary.withValues(alpha: 0.06) : Colors.transparent,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: _focus ? theme.colorScheme.primary : theme.colorScheme.outline,
-              width: _focus ? 2 : 1,
-            ),
-          ),
-          child: Text(widget.label, style: theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.primary)),
-        ),
-      ),
-    );
+    return OutlinedButton(onPressed: onPressed, child: Text(label));
   }
 }
 
@@ -295,29 +131,10 @@ class HorizonBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final t = ((step + 1) / total).clamp(0.0, 1.0);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: SizedBox(
-            height: 8,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                ColoredBox(color: theme.colorScheme.outline.withValues(alpha: 0.45)),
-                FractionallySizedBox(
-                  alignment: Alignment.centerLeft,
-                  widthFactor: t,
-                  child: ColoredBox(color: theme.colorScheme.primary),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
+    return LinearProgressIndicator(
+      value: ((step + 1) / total).clamp(0.0, 1.0),
+      minHeight: 6,
+      borderRadius: TroveyRadii.card,
     );
   }
 }
@@ -341,15 +158,13 @@ class FieldErrorSummary extends StatelessWidget {
     final theme = Theme.of(context);
     return Semantics(
       liveRegion: true,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(TroveySpace.md),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.error.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: theme.colorScheme.error),
+      child: Material(
+        color: theme.colorScheme.errorContainer,
+        borderRadius: TroveyRadii.card,
+        child: Padding(
+          padding: const EdgeInsets.all(TroveySpace.md),
+          child: Text(message, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onErrorContainer)),
         ),
-        child: Text(message, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.error)),
       ),
     );
   }
@@ -383,9 +198,113 @@ class ChoicePair extends StatelessWidget {
         if (next.isEmpty) return;
         onChanged(next.first);
       },
-      style: ButtonStyle(
-        minimumSize: const WidgetStatePropertyAll(Size(48, 48)),
-        visualDensity: VisualDensity.standard,
+      style: const ButtonStyle(minimumSize: WidgetStatePropertyAll(Size(48, 48))),
+    );
+  }
+}
+
+class FieldHero extends StatelessWidget {
+  const FieldHero({super.key, required this.store, required this.onStart});
+
+  final TroveyStore store;
+  final VoidCallback onStart;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const BrandMark(size: 64),
+            const SizedBox(width: TroveySpace.md),
+            Text(
+              'Trovey',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                letterSpacing: -0.6,
+                height: 1.15,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: TroveySpace.md),
+        Text(
+          store.t('heroKicker'),
+          style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.primary),
+        ),
+        const SizedBox(height: TroveySpace.sm),
+        Text(store.t('topicTitle'), style: theme.textTheme.headlineMedium),
+        const SizedBox(height: TroveySpace.sm),
+        Text(
+          store.t('topicBody'),
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: theme.colorScheme.onSurface,
+            height: 1.45,
+          ),
+        ),
+        const SizedBox(height: TroveySpace.md),
+        Wrap(
+          spacing: TroveySpace.sm,
+          runSpacing: TroveySpace.sm,
+          children: [
+            Chip(label: Text(store.t('topicField'))),
+            Chip(label: Text(store.t('topicPerson'))),
+            Chip(label: Text(store.t('topicHabits'))),
+          ],
+        ),
+        const SizedBox(height: TroveySpace.md),
+        Text(
+          store.t('heroTitle'),
+          style: theme.textTheme.labelMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w400,
+            height: 1.35,
+          ),
+        ),
+        const SizedBox(height: TroveySpace.sm),
+        Text(
+          store.t('homeLead'),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+            height: 1.45,
+          ),
+        ),
+        const SizedBox(height: TroveySpace.md),
+        Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: TroveySpace.sm,
+          runSpacing: TroveySpace.sm,
+          children: [
+            Text(Collector.name, style: theme.textTheme.titleMedium),
+            TextButton(
+              onPressed: () => InstallBridge.openUrl(Collector.url),
+              child: const Text(Collector.site),
+            ),
+            Text(Collector.id, style: theme.textTheme.labelMedium),
+          ],
+        ),
+        const SizedBox(height: TroveySpace.lg),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton(onPressed: onStart, child: Text(store.t('homeCta'))),
+        ),
+      ],
+    );
+  }
+}
+
+class PageWidth extends StatelessWidget {
+  const PageWidth({super.key, required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 560),
+        child: child,
       ),
     );
   }

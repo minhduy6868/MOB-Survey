@@ -32,12 +32,15 @@ class ResultsScreen extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(TroveySpace.md, TroveySpace.md, TroveySpace.md, TroveySpace.xxl),
       children: [
-        Text(store.t('results'), style: theme.textTheme.headlineMedium),
-        const SizedBox(height: TroveySpace.sm),
-        Text(store.t('resultsLead'), style: theme.textTheme.bodyLarge?.copyWith(color: TroveyColors.muted, height: 1.5)),
+        Text(
+          store.t('resultsLead'),
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+            height: 1.5,
+          ),
+        ),
         const SizedBox(height: TroveySpace.md),
-        TicketCard(
-          stub: 'TOTAL',
+        PadCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -50,17 +53,16 @@ class ResultsScreen extends StatelessWidget {
           const SizedBox(height: TroveySpace.md),
           SectionLabel(store.t('thisInterview')),
           const SizedBox(height: TroveySpace.sm),
-          TicketCard(
-            stub: 'YOU',
+          PadCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _line(context, store.t('synced'), statusLabel(store.locale, latest.status.name)),
-                _line(context, fieldLabel('siteCountry', store.locale), '${latest.answers['siteCountry'] ?? '—'}'),
+                _line(context, fieldLabel('siteCountry', store.locale), '${latest.answers['siteCountry'] ?? '-'}'),
                 _line(context, fieldLabel('markets', store.locale), _list(latest.answers['markets'], 'markets')),
                 _line(context, fieldLabel('style', store.locale), optionLabel('style', '${latest.answers['style'] ?? ''}', store.locale)),
-                _line(context, fieldLabel('hoursPerWeek', store.locale), '${latest.answers['hoursPerWeek'] ?? '—'}'),
-                _line(context, fieldLabel('biggestChallenge', store.locale), '${latest.answers['biggestChallenge'] ?? '—'}'),
+                _line(context, fieldLabel('hoursPerWeek', store.locale), '${latest.answers['hoursPerWeek'] ?? '-'}'),
+                _line(context, fieldLabel('biggestChallenge', store.locale), '${latest.answers['biggestChallenge'] ?? '-'}'),
               ],
             ),
           ),
@@ -70,8 +72,7 @@ class ResultsScreen extends StatelessWidget {
         const SizedBox(height: TroveySpace.md),
         _bars(context, store.t('styleChart'), stats.styles, 'style'),
         const SizedBox(height: TroveySpace.md),
-        TicketCard(
-          stub: 'STOP',
+        PadCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -87,28 +88,28 @@ class ResultsScreen extends StatelessWidget {
         SectionLabel(store.t('recent')),
         const SizedBox(height: TroveySpace.sm),
         if (submitted.isEmpty)
-          TicketCard(stub: '0', child: Text(store.t('emptyHistory')))
+          PadCard(child: Text(store.t('emptyHistory')))
         else
-          ...submitted.take(8).map(
-                (row) => Padding(
-                  padding: const EdgeInsets.only(bottom: TroveySpace.sm),
-                  child: TicketCard(
-                    stub: row.clientId.substring(0, 8).toUpperCase(),
+          Card(
+            child: Column(
+              children: [
+                for (final row in submitted.take(8)) ...[
+                  if (row != submitted.first) const Divider(),
+                  ListTile(
                     onTap: () => onOpen(row.clientId),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            '${row.answers['siteCountry'] ?? '—'} · ${optionLabel('style', '${row.answers['style'] ?? ''}', store.locale)}',
-                            style: theme.textTheme.titleMedium,
-                          ),
-                        ),
-                        StatusStamp(status: row.status, locale: store.locale),
-                      ],
+                    contentPadding: const EdgeInsets.symmetric(horizontal: TroveySpace.md),
+                    title: Text(
+                      '${row.answers['siteCountry'] ?? store.t('resume')} · ${optionLabel('style', '${row.answers['style'] ?? ''}', store.locale)}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
+                    subtitle: Text(statusLabel(store.locale, row.status.name)),
+                    trailing: const Icon(Icons.chevron_right),
                   ),
-                ),
-              ),
+                ],
+              ],
+            ),
+          ),
       ],
     );
   }
@@ -129,22 +130,24 @@ class ResultsScreen extends StatelessWidget {
   }
 
   String _list(dynamic value, String fieldId) {
-    if (value is! List) return '—';
+    if (value is! List) return '-';
     return value.map((v) => optionLabel(fieldId, '$v', store.locale)).join(', ');
   }
 
   Widget _bars(BuildContext context, String title, List<CountRow> rows, String fieldId) {
     final theme = Theme.of(context);
     final max = rows.isEmpty ? 1 : rows.first.count;
-    return TicketCard(
-      stub: 'DATA',
+    return PadCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title, style: theme.textTheme.titleMedium),
           const SizedBox(height: TroveySpace.md),
           if (rows.isEmpty)
-            Text(store.t('emptyHistory'), style: theme.textTheme.bodyMedium?.copyWith(color: TroveyColors.muted))
+            Text(
+              store.t('emptyHistory'),
+              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            )
           else
             ...rows.map((row) {
               final w = row.count / max;
@@ -161,11 +164,11 @@ class ResultsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: TroveySpace.xs),
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: TroveyRadii.card,
                       child: LinearProgressIndicator(
                         value: w,
                         minHeight: 8,
-                        backgroundColor: theme.colorScheme.outline.withValues(alpha: 0.4),
+                        backgroundColor: theme.colorScheme.outlineVariant,
                         color: theme.colorScheme.primary,
                       ),
                     ),

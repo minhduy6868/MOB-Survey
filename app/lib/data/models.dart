@@ -1,3 +1,5 @@
+import 'collector.dart';
+
 enum ResponseStatus { draft, queued, syncing, synced, failed }
 
 class GpsValue {
@@ -82,8 +84,8 @@ class SurveyResponse {
 
 class Settings {
   Settings({
-    this.collectorName = '',
-    this.collectorId = '',
+    this.collectorName = Collector.fullName,
+    this.collectorId = Collector.id,
     this.locale = 'vi',
     this.theme = 'paper',
   });
@@ -96,21 +98,21 @@ class Settings {
   bool get isNight => theme == 'night';
 
   Map<String, dynamic> toJson() => {
-        'collectorName': collectorName,
-        'collectorId': collectorId,
+        'collectorName': Collector.fullName,
+        'collectorId': Collector.id,
         'locale': locale,
         'theme': theme,
       };
 
   factory Settings.fromJson(Map<String, dynamic> json) => Settings(
-        collectorName: json['collectorName'] as String? ?? '',
-        collectorId: json['collectorId'] as String? ?? '',
+        collectorName: Collector.fullName,
+        collectorId: Collector.id,
         locale: json['locale'] as String? ?? 'vi',
         theme: json['theme'] as String? ?? 'paper',
       );
 }
 
-enum FieldType { text, long, single, multi, number, yesno, photo, gps }
+enum FieldType { text, long, single, dropdown, multi, number, yesno, photo, gps, phone }
 
 class FieldOption {
   const FieldOption(this.value, this.vi, this.en);

@@ -10,12 +10,18 @@ class BrandMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final radius = rounded ? size * 0.22 : 0.0;
     return Semantics(
       label: 'Trovey',
       image: true,
-      child: CustomPaint(
-        size: Size.square(size),
-        painter: _MarkPainter(rounded: rounded),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: Image.asset(
+          'assets/brand/mark.png',
+          width: size,
+          height: size,
+          filterQuality: FilterQuality.medium,
+        ),
       ),
     );
   }
@@ -38,41 +44,10 @@ class BrandLockup extends StatelessWidget {
           'Trovey',
           style: theme.textTheme.titleLarge?.copyWith(
             letterSpacing: -0.4,
-            height: 1,
+            height: 1.15,
           ),
         ),
       ],
     );
   }
-}
-
-class _MarkPainter extends CustomPainter {
-  const _MarkPainter({required this.rounded});
-  final bool rounded;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final r = RRect.fromRectAndRadius(
-      Offset.zero & size,
-      Radius.circular(rounded ? size.width * 0.22 : 0),
-    );
-    canvas.drawRRect(r, Paint()..color = TroveyColors.brass);
-
-    double map(double v) => v / 512 * size.width;
-    final sun = Rect.fromLTWH(map(184), map(104), map(144), map(144));
-    final bar = RRect.fromRectAndRadius(
-      Rect.fromLTWH(map(80), map(264), map(352), map(64)),
-      Radius.circular(map(32)),
-    );
-    final stem = RRect.fromRectAndRadius(
-      Rect.fromLTWH(map(224), map(264), map(64), map(164)),
-      Radius.circular(map(32)),
-    );
-    canvas.drawOval(sun, Paint()..color = TroveyColors.dawn);
-    canvas.drawRRect(bar, Paint()..color = TroveyColors.paper);
-    canvas.drawRRect(stem, Paint()..color = TroveyColors.paper);
-  }
-
-  @override
-  bool shouldRepaint(covariant _MarkPainter oldDelegate) => oldDelegate.rounded != rounded;
 }

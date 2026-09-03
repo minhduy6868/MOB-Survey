@@ -2,24 +2,37 @@
    install → activate → fetch
    Cache-First | Network-First | Stale-While-Revalidate | Cache-Only | Network-Only
 */
-const SHELL = 'trovey-shell-v2';
-const RUNTIME = 'trovey-runtime-v2';
-const TEMPLATE = 'trovey-template-v2';
+const SHELL = 'trovey-shell-v9';
+const RUNTIME = 'trovey-runtime-v9';
+const TEMPLATE = 'trovey-template-v9';
+const CANONICAL = 'https://app.puretrovey.net';
 
 const PRECACHE = [
   '/',
   '/index.html',
-  '/offline.html',
+  '/offline',
   '/manifest.json',
   '/install.js',
   '/survey-template.json',
   '/sw-stats.json',
   '/favicon.png',
   '/favicon.ico',
+  '/favicon-16x16.png',
+  '/favicon-32x32.png',
+  '/favicon-96x96.png',
   '/apple-touch-icon.png',
+  '/og.png',
   '/icons/icon.svg',
+  '/icons/Icon-48.png',
+  '/icons/Icon-72.png',
+  '/icons/Icon-96.png',
+  '/icons/Icon-144.png',
   '/icons/Icon-192.png',
+  '/icons/Icon-256.png',
+  '/icons/Icon-384.png',
   '/icons/Icon-512.png',
+  '/icons/Icon-maskable-192.png',
+  '/icons/Icon-maskable-512.png',
 ];
 
 self.addEventListener('install', (event) => {
@@ -49,13 +62,17 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   const url = new URL(req.url);
+  if (url.hostname === 'puretrovey.net' || url.hostname === 'www.puretrovey.net') {
+    event.respondWith(Response.redirect(CANONICAL + url.pathname + url.search, 302));
+    return;
+  }
   if (req.method !== 'GET') return;
 
-  if (url.pathname === '/api/sync') {
+  if (url.pathname.startsWith('/api/')) {
     event.respondWith(networkOnly(req));
     return;
   }
-  if (url.pathname === '/offline.html') {
+  if (url.pathname === '/offline' || url.pathname === '/offline.html') {
     event.respondWith(cacheOnly(req));
     return;
   }
@@ -69,7 +86,14 @@ self.addEventListener('fetch', (event) => {
   }
   if (req.mode === 'navigate') {
     event.respondWith(
-      caches.match('/index.html').then((cached) => cached || fetch(req).catch(() => caches.match('/offline.html'))),
+      fetch(req)
+        .then((fresh) => {
+          if (fresh && fresh.ok) {
+            caches.open(SHELL).then((cache) => cache.put('/index.html', fresh.clone()));
+          }
+          return fresh;
+        })
+        .catch(async () => (await caches.match('/index.html')) || (await caches.match('/offline'))),
     );
     return;
   }
@@ -101,7 +125,7 @@ async function cacheFirst(req) {
     return fresh;
   } catch {
     if (req.destination === 'document') {
-      return (await caches.match('/offline.html')) || Response.error();
+      return (await caches.match('/offline')) || Response.error();
     }
     return Response.error();
   }

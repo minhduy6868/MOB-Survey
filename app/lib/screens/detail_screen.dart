@@ -28,6 +28,8 @@ class DetailScreen extends StatelessWidget {
     }
     final canEdit = row.status == ResponseStatus.draft;
     final theme = Theme.of(context);
+    final place = '${row.answers['interviewPlace'] ?? ''}'.trim();
+    final title = '${row.answers['siteCountry'] ?? store.t('resume')} · ${row.answers['siteCity'] ?? place}';
     return ListView(
       padding: const EdgeInsets.fromLTRB(TroveySpace.md, TroveySpace.md, TroveySpace.md, TroveySpace.xxl),
       children: [
@@ -39,36 +41,38 @@ class DetailScreen extends StatelessWidget {
           ],
         ),
         const SizedBox(height: TroveySpace.md),
-        Text(row.clientId, style: theme.textTheme.labelMedium),
+        Text(title.trim(), style: theme.textTheme.headlineSmall),
         const SizedBox(height: TroveySpace.md),
-        TicketCard(
-          stub: 'REC',
+        PadCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               for (final field in fieldLabels.keys)
                 if ('${row.answers[field] ?? ''}'.isNotEmpty)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.only(bottom: TroveySpace.md),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(fieldLabel(field, store.locale), style: TroveyTheme.mono(size: 11, color: TroveyColors.muted)),
-                        const SizedBox(height: 4),
-                        Text(_display(row.answers[field])),
+                        Text(
+                          fieldLabel(field, store.locale),
+                          style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                        ),
+                        const SizedBox(height: TroveySpace.xs),
+                        Text(_display(row.answers[field]), style: theme.textTheme.bodyLarge),
                       ],
                     ),
                   ),
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: TroveySpace.md),
         if (canEdit) PrimaryButton(label: store.t('resume'), onPressed: onEdit),
         if (row.status == ResponseStatus.failed || row.status == ResponseStatus.queued) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: TroveySpace.sm),
           PrimaryButton(label: store.t('retry'), onPressed: () => store.sendOne(row.clientId)),
         ],
-        const SizedBox(height: 8),
+        const SizedBox(height: TroveySpace.sm),
         GhostButton(
           label: store.t('delete'),
           onPressed: () async {

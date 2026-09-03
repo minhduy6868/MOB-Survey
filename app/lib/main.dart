@@ -54,6 +54,8 @@ class _ShellState extends State<Shell> {
 
   TroveyStore get store => widget.store;
 
+  bool get _inFlow => _tab == 3 || _tab == 4;
+
   void _open(String route, {String? id}) {
     setState(() {
       if (route == 'form') {
@@ -73,38 +75,60 @@ class _ShellState extends State<Shell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          StatusTape(store: store),
-          Expanded(child: _body()),
-        ],
+      appBar: AppHeader(
+        store: store,
+        title: _title(),
+        leading: _inFlow
+            ? IconButton(
+                tooltip: store.t('back'),
+                onPressed: () => setState(() {
+                  _tab = _tab == 4 ? 1 : 0;
+                  _formId = null;
+                  _detailId = null;
+                }),
+                icon: const Icon(Icons.arrow_back),
+              )
+            : null,
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _tab > 2 ? 0 : _tab,
-        onDestinationSelected: (i) => setState(() {
-          _tab = i;
-          _detailId = null;
-          _formId = null;
-        }),
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.home_outlined),
-            selectedIcon: const Icon(Icons.home),
-            label: store.t('home'),
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.bar_chart_outlined),
-            selectedIcon: const Icon(Icons.bar_chart),
-            label: store.t('results'),
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.settings_outlined),
-            selectedIcon: const Icon(Icons.settings),
-            label: store.t('settings'),
-          ),
-        ],
-      ),
+      body: SafeArea(child: PageWidth(child: _body())),
+      bottomNavigationBar: _inFlow
+          ? null
+          : NavigationBar(
+              selectedIndex: _tab > 2 ? 0 : _tab,
+              onDestinationSelected: (i) => setState(() {
+                _tab = i;
+                _detailId = null;
+                _formId = null;
+              }),
+              destinations: [
+                NavigationDestination(
+                  icon: const Icon(Icons.home_outlined),
+                  selectedIcon: const Icon(Icons.home),
+                  label: store.t('home'),
+                ),
+                NavigationDestination(
+                  icon: const Icon(Icons.bar_chart_outlined),
+                  selectedIcon: const Icon(Icons.bar_chart),
+                  label: store.t('results'),
+                ),
+                NavigationDestination(
+                  icon: const Icon(Icons.settings_outlined),
+                  selectedIcon: const Icon(Icons.settings),
+                  label: store.t('settings'),
+                ),
+              ],
+            ),
     );
+  }
+
+  String _title() {
+    return switch (_tab) {
+      1 => store.t('results'),
+      2 => store.t('settings'),
+      3 => store.t('newInterview'),
+      4 => store.t('results'),
+      _ => 'Trovey',
+    };
   }
 
   Widget _body() {

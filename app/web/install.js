@@ -35,6 +35,38 @@
     return standalone || display;
   };
 
+  window.troveyOpenUrl = function (url) {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  window.troveyDownloadText = function (filename, text) {
+    var blob = new Blob([text], { type: 'text/csv;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  window.__troveyOnDrain = null;
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', function (event) {
+      if (event.data && event.data.type === 'DRAIN_QUEUE' && typeof window.__troveyOnDrain === 'function') {
+        window.__troveyOnDrain();
+      }
+    });
+    window.addEventListener('online', function () {
+      navigator.serviceWorker.ready.then(function (reg) {
+        if (reg.sync) reg.sync.register('trovey-sync');
+      }).catch(function () {});
+    });
+    navigator.serviceWorker.ready.then(function (reg) {
+      if (reg.sync) return reg.sync.register('trovey-sync');
+    }).catch(function () {});
+  }
+
   window.troveyIsIos = function () {
     var ua = window.navigator.userAgent || '';
     var iOS = /iPad|iPhone|iPod/.test(ua);

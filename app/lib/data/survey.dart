@@ -1,3 +1,4 @@
+import 'countries.dart';
 import 'models.dart';
 
 const surveyId = 'trading-world-v1';
@@ -10,7 +11,7 @@ const sections = <SectionDef>[
     hintVi: 'Như phiếu điều tra xã hội học: nơi gặp người được hỏi.',
     hintEn: 'Where this interview is taking place.',
     fields: [
-      FieldDef(id: 'siteCountry', type: FieldType.text, required: true),
+      FieldDef(id: 'siteCountry', type: FieldType.dropdown, required: true, options: countryOptions),
       FieldDef(id: 'siteCity', type: FieldType.text),
       FieldDef(
         id: 'interviewPlace',
@@ -35,6 +36,8 @@ const sections = <SectionDef>[
     vi: 'Người được hỏi',
     en: 'Respondent',
     fields: [
+      FieldDef(id: 'respondentName', type: FieldType.text, required: true),
+      FieldDef(id: 'respondentPhone', type: FieldType.phone),
       FieldDef(
         id: 'ageRange',
         type: FieldType.single,
@@ -126,6 +129,8 @@ const sections = <SectionDef>[
 ];
 
 const fieldLabels = <String, ({String vi, String en})>{
+  'respondentName': (vi: 'Tên người được hỏi', en: 'Respondent name'),
+  'respondentPhone': (vi: 'Số điện thoại (nếu có)', en: 'Phone (optional)'),
   'siteCountry': (vi: 'Quốc gia phỏng vấn', en: 'Interview country'),
   'siteCity': (vi: 'Thành phố / vùng', en: 'City / region'),
   'interviewPlace': (vi: 'Nơi gặp', en: 'Meeting place'),
@@ -151,6 +156,8 @@ String fieldLabel(String id, String locale) {
 }
 
 Map<String, dynamic> emptyAnswers() => {
+      'respondentName': '',
+      'respondentPhone': '',
       'siteCountry': '',
       'siteCity': '',
       'interviewPlace': '',

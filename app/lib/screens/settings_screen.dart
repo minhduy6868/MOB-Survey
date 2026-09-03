@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
+import '../data/collector.dart';
+import '../data/install.dart';
 import '../data/store.dart';
 import '../theme/tokens.dart';
-import '../widgets/chrome.dart';
 import '../widgets/install_card.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key, required this.store});
   final TroveyStore store;
+
+  Future<void> _export(BuildContext context) async {
+    final csv = store.exportCsv();
+    InstallBridge.downloadText('trovey-phieu.csv', csv);
+    await Clipboard.setData(ClipboardData(text: csv));
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(store.t('csvCopied'))));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,107 +26,82 @@ class SettingsScreen extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(TroveySpace.md, TroveySpace.md, TroveySpace.md, TroveySpace.xxl),
       children: [
-        Text(store.t('settings'), style: theme.textTheme.headlineMedium),
+        Card(
+          child: Column(
+            children: [
+              ListTile(
+                title: Text(Collector.name),
+                subtitle: Text(store.t('collectorName')),
+              ),
+              const Divider(),
+              ListTile(
+                title: const Text(Collector.site),
+                subtitle: Text(store.t('collectorSite')),
+                trailing: const Icon(Icons.open_in_new),
+                onTap: () => InstallBridge.openUrl(Collector.url),
+              ),
+              const Divider(),
+              ListTile(
+                title: Text(store.t('collectorId')),
+                subtitle: const Text(Collector.id),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(TroveySpace.md, 0, TroveySpace.md, TroveySpace.md),
+                child: Text(
+                  store.t('collectorLocked'),
+                  style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                ),
+              ),
+            ],
+          ),
+        ),
         const SizedBox(height: TroveySpace.md),
-        TicketCard(
-          stub: 'ID',
+        Card(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(store.t('collectorName')),
-              const SizedBox(height: 8),
-              TextFormField(
-                initialValue: s.collectorName,
-                onChanged: (v) => store.saveSettings(s..collectorName = v),
+              ListTile(
+                title: Text(store.t('language')),
+                subtitle: Text(s.locale == 'en' ? 'English' : 'Tiếng Việt'),
               ),
-              const SizedBox(height: 16),
-              Text(store.t('collectorId')),
-              const SizedBox(height: 8),
-              TextFormField(
-                initialValue: s.collectorId,
-                onChanged: (v) => store.saveSettings(s..collectorId = v),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(TroveySpace.md, 0, TroveySpace.md, TroveySpace.md),
+                child: SegmentedButton<String>(
+                  segments: const [
+                    ButtonSegment(value: 'vi', label: Text('Tiếng Việt')),
+                    ButtonSegment(value: 'en', label: Text('English')),
+                  ],
+                  selected: {s.locale},
+                  onSelectionChanged: (next) => store.saveSettings(s..locale = next.first),
+                ),
+              ),
+              const Divider(),
+              ListTile(
+                title: Text(store.t('theme')),
+                subtitle: Text(store.t(s.theme == 'night' ? 'night' : 'paper')),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(TroveySpace.md, 0, TroveySpace.md, TroveySpace.md),
+                child: SegmentedButton<String>(
+                  segments: [
+                    ButtonSegment(value: 'paper', label: Text(store.t('paper'))),
+                    ButtonSegment(value: 'night', label: Text(store.t('night'))),
+                  ],
+                  selected: {s.theme},
+                  onSelectionChanged: (next) => store.saveSettings(s..theme = next.first),
+                ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 16),
-        TicketCard(
-          stub: 'UI',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(store.t('language')),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                children: [
-                  ChoiceChip(
-                    label: const Text('Tiếng Việt'),
-                    selected: s.locale == 'vi',
-                    onSelected: (_) => store.saveSettings(s..locale = 'vi'),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  ),
-                  ChoiceChip(
-                    label: const Text('English'),
-                    selected: s.locale == 'en',
-                    onSelected: (_) => store.saveSettings(s..locale = 'en'),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Text(store.t('theme')),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                children: [
-                  ChoiceChip(
-                    label: Text(store.t('paper')),
-                    selected: s.theme == 'paper',
-                    onSelected: (_) => store.saveSettings(s..theme = 'paper'),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  ),
-                  ChoiceChip(
-                    label: Text(store.t('night')),
-                    selected: s.theme == 'night',
-                    onSelected: (_) => store.saveSettings(s..theme = 'night'),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
+        const SizedBox(height: TroveySpace.md),
         InstallCard(store: store),
-        const SizedBox(height: 16),
-        TicketCard(
-          stub: 'PWA',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(store.t('diagnostics'), style: theme.textTheme.titleMedium),
-              const SizedBox(height: 12),
-              _kv('Service Worker', 'trovey-shell-v2'),
-              _kv(store.t('webhook'), store.t('webhookReady')),
-              _kv(store.t('lastSync'), store.lastSyncAt.isEmpty ? store.t('never') : store.lastSyncAt),
-              _kv(store.t('queue'), '${store.queueCount}'),
-            ],
-          ),
+        const SizedBox(height: TroveySpace.md),
+        OutlinedButton.icon(
+          onPressed: () => _export(context),
+          icon: const Icon(Icons.download),
+          label: Text(store.t('exportCsv')),
         ),
       ],
-    );
-  }
-
-  Widget _kv(String k, String v) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          Expanded(child: Text(k, style: TroveyTheme.mono(size: 11, color: TroveyColors.muted))),
-          Flexible(child: Text(v, style: TroveyTheme.mono(size: 11))),
-        ],
-      ),
     );
   }
 }

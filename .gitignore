@@ -33,3 +33,13 @@ app/*.iml
 dist/
 Week-03-PWA.pdf
 logos/export/*.png
+logos/android/
+logos/master-1024.png
+app/web/downloads/*.apk
+app/assets/brand/lockup.png
+DESIGN.md
+
+# Android local / generated
+app/android/local.properties
+app/android/.gradle/
+app/android/.kotlin/

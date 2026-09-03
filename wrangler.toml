@@ -2,12 +2,12 @@ name = "trovey"
 compatibility_date = "2026-09-01"
 pages_build_output_dir = "app/build/web"
 
-# Put SHEETS_WEBHOOK in Cloudflare as a secret, not in this file:
-#   npx wrangler pages secret put SHEETS_WEBHOOK --project-name trovey
+# Canonical host on campus: https://app.puretrovey.net
+# Tickets live in Cloudflare KV. Google Sheet is optional.
 
-# Optional KV copy of every ticket. Create with:
-#   npx wrangler kv namespace create TROVEY_RECORDS
-# then paste the id below.
-# [[kv_namespaces]]
-# binding = "TROVEY_RECORDS"
-# id = "xxxx"
+[[kv_namespaces]]
+binding = "TROVEY_RECORDS"
+id = "0917d0b35951466da2cbc82e3343d663"
+preview_id = "0917d0b35951466da2cbc82e3343d663"
+
+# Optional: npx wrangler pages secret put SHEETS_WEBHOOK --project-name trovey

@@ -6,7 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
 
+import 'collector.dart';
 import 'i18n.dart';
+import 'install.dart';
 import 'models.dart';
 import 'survey.dart';
 import 'sync.dart';
@@ -35,10 +37,13 @@ class TroveyStore extends ChangeNotifier {
 
   Future<void> init() async {
     await Hive.initFlutter();
-    _responses = await Hive.openBox<String>('responses');
+    _responses = await Hive.openBox<String>('tickets-v3');
     _settingsBox = await Hive.openBox<String>('settings');
     _meta = await Hive.openBox<String>('meta');
     _loadSettings();
+    settings
+      ..collectorName = Collector.fullName
+      ..collectorId = Collector.id;
     _loadRecords();
     lastSyncAt = _meta.get('lastSyncAt') ?? '';
     final status = await Connectivity().checkConnectivity();
@@ -46,9 +51,14 @@ class TroveyStore extends ChangeNotifier {
     _sub = Connectivity().onConnectivityChanged.listen((results) {
       online = !results.contains(ConnectivityResult.none);
       notifyListeners();
-      if (online) unawaited(drainQueue());
+      if (online) unawaited(_hydrate());
     });
-    if (online) unawaited(drainQueue());
+    if (online) {
+      unawaited(_hydrate());
+    }
+    if (kIsWeb) {
+      InstallBridge.onDrain(() => unawaited(_hydrate()));
+    }
     notifyListeners();
   }
 
@@ -121,6 +131,35 @@ class TroveyStore extends ChangeNotifier {
     return row;
   }
 
+  Future<void> _hydrate() async {
+    await pullCloud();
+    await drainQueue();
+  }
+
+  Future<void> pullCloud() async {
+    if (!online) return;
+    try {
+      final remote = await SyncClient.list();
+      for (final row in remote) {
+        final id = '${row['clientId'] ?? ''}';
+        if (id.isEmpty) continue;
+        final existing = getById(id);
+        if (existing != null &&
+            (existing.status == ResponseStatus.draft ||
+                existing.status == ResponseStatus.queued ||
+                existing.status == ResponseStatus.syncing ||
+                existing.status == ResponseStatus.failed)) {
+          continue;
+        }
+        await _responses.put(id, jsonEncode(responseFromCloud(row).toJson()));
+      }
+      _loadRecords();
+      notifyListeners();
+    } catch (_) {
+      /* keep local copy */
+    }
+  }
+
   Future<void> drainQueue() async {
     if (!online) return;
     final pending = records
@@ -129,6 +168,57 @@ class TroveyStore extends ChangeNotifier {
     for (final row in pending) {
       await sendOne(row.clientId);
     }
+  }
+
+  String exportCsv() {
+    const headers = [
+      'clientId',
+      'status',
+      'surveyId',
+      'collectorName',
+      'collectorId',
+      'locale',
+      'createdAt',
+      'submittedAt',
+      'siteCountry',
+      'siteCity',
+      'interviewPlace',
+      'lat',
+      'lng',
+      'ageRange',
+      'yearsTrading',
+      'markets',
+      'style',
+      'hoursPerWeek',
+      'platform',
+      'usesStop',
+      'biggestChallenge',
+      'resultBand',
+    ];
+    final lines = <String>[headers.join(',')];
+    for (final row in records) {
+      final flat = flattenAnswers(row.answers);
+      final map = <String, String>{
+        'clientId': row.clientId,
+        'status': row.status.name,
+        'surveyId': surveyId,
+        'collectorName': Collector.fullName,
+        'collectorId': Collector.id,
+        'locale': settings.locale,
+        'createdAt': row.createdAt,
+        'submittedAt': row.submittedAt ?? '',
+        ...flat,
+      };
+      lines.add(headers.map((h) => _csv(map[h] ?? '')).join(','));
+    }
+    return lines.join('\n');
+  }
+
+  String _csv(String value) {
+    if (value.contains(',') || value.contains('"') || value.contains('\n')) {
+      return '"${value.replaceAll('"', '""')}"';
+    }
+    return value;
   }
 
   Future<void> sendOne(String clientId) async {

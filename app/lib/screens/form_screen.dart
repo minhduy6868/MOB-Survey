@@ -122,52 +122,78 @@ class _FormScreenState extends State<FormScreen> {
               controller: _scroll,
               padding: const EdgeInsets.fromLTRB(TroveySpace.md, TroveySpace.md, TroveySpace.md, TroveySpace.lg),
               children: [
-                Text(store.t('newInterview'), style: theme.textTheme.headlineMedium),
-                const SizedBox(height: TroveySpace.sm),
-                Text(
-                  '${store.t('step')} ${_step + 1}/${sections.length}  ·  ${section.title(store.locale)}',
-                  style: theme.textTheme.labelMedium,
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      for (var i = 0; i < sections.length; i++) ...[
+                        if (i > 0) const SizedBox(width: TroveySpace.sm),
+                        FilterChip(
+                          selected: i == _step,
+                          label: Text('${i + 1}  ${sections[i].title(store.locale)}'),
+                          onSelected: i <= _step
+                              ? (_) => setState(() {
+                                    _step = i;
+                                    _errors = {};
+                                  })
+                              : null,
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
                 const SizedBox(height: TroveySpace.md),
                 HorizonBar(step: _step, total: sections.length),
                 const SizedBox(height: TroveySpace.sm),
-                Text(store.t('draftSaved'), style: theme.textTheme.bodyMedium?.copyWith(color: TroveyColors.cleared)),
+                Text(
+                  store.t('draftSaved'),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.extension<AppColors>()?.success ?? theme.colorScheme.primary,
+                  ),
+                ),
                 if (_errors.isNotEmpty) ...[
                   const SizedBox(height: TroveySpace.md),
                   FieldErrorSummary(message: store.t('errorSummary')),
                 ],
-                const SizedBox(height: TroveySpace.lg),
-                TicketCard(
-                  stub: section.id.toUpperCase(),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(section.title(store.locale), style: theme.textTheme.headlineSmall),
-                      if (section.hint(store.locale) != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 6, bottom: TroveySpace.md),
-                          child: Text(
-                            section.hint(store.locale)!,
-                            style: theme.textTheme.bodyMedium?.copyWith(color: TroveyColors.muted, height: 1.5),
-                          ),
-                        )
-                      else
-                        const SizedBox(height: TroveySpace.md),
-                      ...section.fields.map(
-                        (field) => FieldBlock(
-                          field: field,
-                          answers: row.answers,
-                          locale: store.locale,
-                          error: _errors.containsKey(field.id),
-                          photoB64: row.photoB64,
-                          onPhoto: (b64) => _touch(() => row.photoB64 = b64),
-                          onChanged: (value) => _touch(() {
-                            row.answers[field.id] = value;
-                            _errors.remove(field.id);
-                          }),
-                        ),
+                const SizedBox(height: TroveySpace.md),
+                if (_step == 0) ...[
+                  Text(store.t('topicTitle'), style: theme.textTheme.titleLarge),
+                  const SizedBox(height: TroveySpace.sm),
+                  Text(
+                    store.t('topicBody'),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      height: 1.45,
+                    ),
+                  ),
+                  const SizedBox(height: TroveySpace.lg),
+                ],
+                Text(section.title(store.locale), style: theme.textTheme.headlineSmall),
+                if (section.hint(store.locale) != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: TroveySpace.sm, bottom: TroveySpace.md),
+                    child: Text(
+                      section.hint(store.locale)!,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        height: 1.5,
                       ),
-                    ],
+                    ),
+                  )
+                else
+                  const SizedBox(height: TroveySpace.md),
+                ...section.fields.map(
+                  (field) => FieldBlock(
+                    field: field,
+                    answers: row.answers,
+                    locale: store.locale,
+                    error: _errors.containsKey(field.id),
+                    photoB64: row.photoB64,
+                    onPhoto: (b64) => _touch(() => row.photoB64 = b64),
+                    onChanged: (value) => _touch(() {
+                      row.answers[field.id] = value;
+                      _errors.remove(field.id);
+                    }),
                   ),
                 ),
               ],

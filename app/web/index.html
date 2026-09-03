@@ -4,7 +4,12 @@
   <base href="$FLUTTER_BASE_HREF">
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="Trovey — field interviews about trading, worldwide. Works offline.">
+  <meta name="description" content="Trovey: khảo sát thói quen giao dịch. Dùng được khi mất mạng.">
+  <meta property="og:title" content="Trovey">
+  <meta property="og:description" content="Khảo sát hiện trường về thói quen giao dịch. Dùng được khi mất mạng.">
+  <meta property="og:image" content="https://app.puretrovey.net/og.png">
+  <meta property="og:image:width" content="1920">
+  <meta property="og:image:height" content="1080">
   <meta name="theme-color" content="#0E6E8A">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,10 +23,34 @@
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" href="favicon.png">
   <title>Trovey</title>
+  <link rel="canonical" href="https://app.puretrovey.net/">
   <link rel="manifest" href="manifest.json">
   <style>
-    html, body { height: 100%; margin: 0; background: #E8F4FA; }
+    html, body { height: 100%; margin: 0; background: #0E6E8A; }
   </style>
+  <script>
+    (function () {
+      var host = location.hostname;
+      if (host === 'puretrovey.net' || host === 'www.puretrovey.net') {
+        location.replace('https://app.puretrovey.net/' + location.pathname.replace(/^\//, '') + location.search + location.hash);
+        return;
+      }
+      if ('serviceWorker' in navigator) {
+        var params = new URLSearchParams(location.search);
+        if (params.get('reset') === '1') {
+          navigator.serviceWorker.getRegistrations().then(function (regs) {
+            return Promise.all(regs.map(function (reg) { return reg.unregister(); }));
+          }).then(function () {
+            return caches.keys();
+          }).then(function (keys) {
+            return Promise.all(keys.map(function (key) { return caches.delete(key); }));
+          }).then(function () {
+            location.replace('https://app.puretrovey.net/');
+          });
+        }
+      }
+    })();
+  </script>
 </head>
 <body>
   <script src="install.js"></script>
@@ -29,7 +58,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function () {
-        navigator.serviceWorker.register('sw.js');
+        navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' });
       });
     }
   </script>
