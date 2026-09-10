@@ -1,0 +1,21 @@
+{
+  "id": "https://pwa.puretrovey.net/",
+  "name": "Trovey",
+  "short_name": "Trovey",
+  "description": "Khảo sát hiện trường về thói quen giao dịch. Dùng được khi mất mạng.",
+  "start_url": "https://pwa.puretrovey.net/",
+  "scope": "https://pwa.puretrovey.net/",
+  "display": "standalone",
+  "background_color": "#0E6E8A",
+  "theme_color": "#0E6E8A",
+  "lang": "vi",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" },
+    { "src": "icons/Icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/Icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/Icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/Icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

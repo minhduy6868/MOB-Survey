@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Trovey">
+  <rect width="512" height="512" fill="#0E6E8A"/>
+  <circle cx="256" cy="86" r="30" fill="#D97706"/>
+  <rect x="88" y="114" width="336" height="10" rx="5" fill="#F7FBFE"/>
+  <rect x="126" y="164" width="260" height="292" rx="32" fill="#F7FBFE"/>
+  <rect x="214" y="144" width="84" height="48" rx="12" fill="#D97706"/>
+  <rect x="158" y="228" width="196" height="14" rx="7" fill="#0E6E8A"/>
+  <rect x="158" y="258" width="160" height="14" rx="7" fill="#0E6E8A"/>
+  <rect x="158" y="288" width="176" height="14" rx="7" fill="#0E6E8A"/>
+  <polyline points="158,380 210,352 248,364 300,318 354,300" fill="none" stroke="#D97706" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="158" cy="380" r="8" fill="#D97706"/>
+  <circle cx="210" cy="352" r="8" fill="#D97706"/>
+  <circle cx="248" cy="364" r="8" fill="#D97706"/>
+  <circle cx="300" cy="318" r="8" fill="#D97706"/>
+  <circle cx="354" cy="300" r="8" fill="#D97706"/>
+</svg>

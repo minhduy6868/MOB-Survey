@@ -1,0 +1,6 @@
+{
+  "app": "trovey-pwa",
+  "cache": "trovey-pwa-shell-v9",
+  "stack": "html-js",
+  "strategies": ["cache-first", "network-first", "stale-while-revalidate", "cache-only", "network-only"]
+}

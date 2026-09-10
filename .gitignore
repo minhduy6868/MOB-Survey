@@ -13,6 +13,7 @@ node_modules/
 .wrangler/
 .cursor/
 .tmp-*.json
+.tmp-*.mjs
 .DS_Store
 Thumbs.db
 
@@ -38,6 +39,8 @@ logos/export/*.png
 logos/android/
 logos/master-1024.png
 app/web/downloads/*.apk
+pwa/downloads/*
+!pwa/downloads/trovey.apk
 app/assets/brand/lockup.png
 DESIGN.md
 docs/evidence/

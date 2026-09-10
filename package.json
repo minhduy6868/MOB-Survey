@@ -4,10 +4,12 @@
   "version": "1.0.0",
   "scripts": {
     "deploy": "wrangler pages deploy app/build/web --project-name trovey",
+    "deploy:pwa": "wrangler pages deploy pwa --project-name trovey-pwa --commit-dirty=true",
     "build:web": "cd app && flutter build web --release --base-href /",
     "cap:sync": "npx cap sync android",
     "cap:open": "npx cap open android",
-    "android:apk": "cd android && .\\gradlew.bat assembleDebug"
+    "android:apk": "cd android && .\\gradlew.bat assembleDebug",
+    "icons:android": "python logos/apply_android_brand.py"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.3",

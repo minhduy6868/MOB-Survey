@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="description" content="Trovey: khảo sát thói quen giao dịch. Dùng được khi mất mạng." />
+  <meta property="og:title" content="Trovey" />
+  <meta property="og:description" content="Khảo sát hiện trường về thói quen giao dịch. Dùng được khi mất mạng." />
+  <meta property="og:image" content="https://pwa.puretrovey.net/icons/Icon-512.png" />
+  <meta name="theme-color" content="#0E6E8A" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Trovey" />
+  <title>Trovey</title>
+  <link rel="canonical" href="https://pwa.puretrovey.net/" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+  <link rel="apple-touch-startup-image" href="icons/splash-1170x2532.png" />
+  <link rel="preload" href="fonts/be-vietnam-pro-400-vi.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="fonts/be-vietnam-pro-700-vi.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="icons/icon.svg" as="image" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    #splash {
+      position: fixed; inset: 0; z-index: 80;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: linear-gradient(180deg, #062833 0%, #0E6E8A 55%, #4A9BB0 100%);
+      color: #F7FBFE; text-align: center;
+      font-family: "Be Vietnam Pro", "Segoe UI", Roboto, "Noto Sans", Arial, sans-serif;
+      transition: opacity .4s ease;
+    }
+    #splash.out { opacity: 0; pointer-events: none; }
+    #splash::before {
+      content: "";
+      position: absolute; width: 180px; height: 180px; border-radius: 50%;
+      top: 18%; right: -20px;
+      background: radial-gradient(circle, #F8D27A 0%, #D97706 40%, transparent 70%);
+    }
+    #splash img { width: 96px; height: 96px; border-radius: 22px; position: relative; }
+    #splash strong { display: block; margin-top: 16px; font-size: 26px; letter-spacing: -0.6px; position: relative; }
+    #splash span { display: block; margin-top: 6px; font-size: 14px; opacity: .88; position: relative; }
+  </style>
+</head>
+<body>
+  <div id="splash" aria-live="polite">
+    <img src="icons/icon.svg" width="96" height="96" alt="Trovey" />
+    <strong>Trovey</strong>
+    <span>Phiếu hiện trường</span>
+  </div>
+  <div id="app" class="app"></div>
+  <script src="data.js"></script>
+  <script src="native.js"></script>
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        var native = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+        if (native) return;
+        navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' });
+      });
+    }
+  </script>
+</body>
+</html>

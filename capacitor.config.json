@@ -1,7 +1,7 @@
 {
   "appId": "net.puretrovey.trovey",
   "appName": "Trovey",
-  "webDir": "app/build/web",
+  "webDir": "pwa",
   "android": {
     "flavor": ""
   },
