@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../data/i18n.dart';
+import '../data/install.dart';
 import '../data/models.dart';
 import '../data/survey.dart';
 import '../theme/tokens.dart';
@@ -192,6 +193,11 @@ class _GpsField extends StatelessWidget {
             GhostButton(
               label: tr(locale, 'captureGps'),
               onPressed: () async {
+                final native = await InstallBridge.captureGps();
+                if (native != null) {
+                  onChanged(native);
+                  return;
+                }
                 final permission = await Geolocator.requestPermission();
                 if (permission == LocationPermission.denied ||
                     permission == LocationPermission.deniedForever) {
@@ -254,6 +260,11 @@ class _PhotoField extends StatelessWidget {
             GhostButton(
               label: tr(locale, 'takePhoto'),
               onPressed: () async {
+                final native = await InstallBridge.takePhoto();
+                if (native != null && native.isNotEmpty) {
+                  onPhoto(native);
+                  return;
+                }
                 final file = await ImagePicker().pickImage(
                   source: ImageSource.gallery,
                   maxWidth: 1280,

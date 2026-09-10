@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:js_interop';
 
 @JS('troveyCanPromptInstall')
@@ -11,6 +12,18 @@ external bool _standalone();
 
 @JS('troveyIsIos')
 external bool _ios();
+
+@JS('troveyIsNative')
+external bool _native();
+
+@JS('troveyTakePhoto')
+external JSPromise<JSAny?> _takePhoto();
+
+@JS('troveyGetGps')
+external JSPromise<JSAny?> _getGps();
+
+@JS('troveyNotifySync')
+external JSPromise<JSAny?> _notifySync(JSString title, JSString body);
 
 @JS('troveyDownloadText')
 external void _download(JSString filename, JSString text);
@@ -43,6 +56,49 @@ class InstallBridge {
       return _ios();
     } catch (_) {
       return false;
+    }
+  }
+
+  static bool get isNative {
+    try {
+      return _native();
+    } catch (_) {
+      return false;
+    }
+  }
+
+  static Future<String?> takePhoto() async {
+    if (!isNative) return null;
+    try {
+      final result = await _takePhoto().toDart;
+      if (result == null) return null;
+      final text = result.dartify();
+      if (text is String && text.isNotEmpty) return text;
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<Map<String, dynamic>?> captureGps() async {
+    if (!isNative) return null;
+    try {
+      final result = await _getGps().toDart;
+      if (result == null) return null;
+      final text = result.dartify();
+      if (text is! String || text.isEmpty) return null;
+      return Map<String, dynamic>.from(jsonDecode(text) as Map);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<void> notifySync(String title, String body) async {
+    if (!isNative) return;
+    try {
+      await _notifySync(title.toJS, body.toJS).toDart;
+    } catch (_) {
+      /* notification permission denied */
     }
   }
 

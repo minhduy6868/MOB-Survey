@@ -53,11 +53,14 @@
   </script>
 </head>
 <body>
+  <script src="native.js"></script>
   <script src="install.js"></script>
   <script src="flutter_bootstrap.js" async></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function () {
+        var native = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+        if (native) return;
         navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' });
       });
     }

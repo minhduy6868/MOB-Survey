@@ -2,9 +2,9 @@
    install → activate → fetch
    Cache-First | Network-First | Stale-While-Revalidate | Cache-Only | Network-Only
 */
-const SHELL = 'trovey-shell-v9';
-const RUNTIME = 'trovey-runtime-v9';
-const TEMPLATE = 'trovey-template-v9';
+const SHELL = 'trovey-shell-v10';
+const RUNTIME = 'trovey-runtime-v10';
+const TEMPLATE = 'trovey-template-v10';
 const CANONICAL = 'https://app.puretrovey.net';
 
 const PRECACHE = [
@@ -13,6 +13,7 @@ const PRECACHE = [
   '/offline',
   '/manifest.json',
   '/install.js',
+  '/native.js',
   '/survey-template.json',
   '/sw-stats.json',
   '/favicon.png',

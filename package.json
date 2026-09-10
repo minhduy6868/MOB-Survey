@@ -3,9 +3,22 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "deploy": "wrangler pages deploy app/build/web --project-name trovey"
+    "deploy": "wrangler pages deploy app/build/web --project-name trovey",
+    "build:web": "cd app && flutter build web --release --base-href /",
+    "cap:sync": "npx cap sync android",
+    "cap:open": "npx cap open android",
+    "android:apk": "cd android && .\\gradlew.bat assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/camera": "^7.0.2",
+    "@capacitor/core": "^7.4.3",
+    "@capacitor/filesystem": "^7.1.4",
+    "@capacitor/geolocation": "^7.1.5",
+    "@capacitor/local-notifications": "^7.0.3"
   },
   "devDependencies": {
+    "@capacitor/cli": "^7.4.3",
     "wrangler": "^4.128.0"
   }
 }

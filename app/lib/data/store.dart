@@ -243,6 +243,9 @@ class TroveyStore extends ChangeNotifier {
       await put(row);
       lastSyncAt = now;
       await _meta.put('lastSyncAt', now);
+      if (kIsWeb) {
+        unawaited(InstallBridge.notifySync(t('syncNotifyTitle'), t('syncNotifyBody')));
+      }
     } catch (error) {
       row
         ..status = ResponseStatus.failed

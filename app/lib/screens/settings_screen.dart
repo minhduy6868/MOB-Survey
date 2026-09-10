@@ -45,6 +45,11 @@ class SettingsScreen extends StatelessWidget {
                 title: Text(store.t('collectorId')),
                 subtitle: const Text(Collector.id),
               ),
+              const Divider(),
+              ListTile(
+                title: Text(InstallBridge.isNative ? store.t('shellNative') : store.t('shellWeb')),
+                subtitle: const Text('Week 5'),
+              ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(TroveySpace.md, 0, TroveySpace.md, TroveySpace.md),
                 child: Text(

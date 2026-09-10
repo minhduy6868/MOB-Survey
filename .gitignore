@@ -32,6 +32,8 @@ app/*.iml
 # leftover / course binary
 dist/
 Week-03-PWA.pdf
+Week-05-Capacitor.pdf
+.tmp-*.txt
 logos/export/*.png
 logos/android/
 logos/master-1024.png
@@ -45,3 +47,8 @@ docs/build_report.py
 app/android/local.properties
 app/android/.gradle/
 app/android/.kotlin/
+android/local.properties
+android/.gradle/
+android/app/build/
+android/app/src/main/assets/public/
+android/captures/

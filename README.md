@@ -1,59 +1,83 @@
 # Trovey
 
 **Course:** Cross-Platform Mobile App Development (VKU)  
-**Mini-Project:** 1 — Week 3 PWA  
 **Student:** Nguyễn Minh Duy — 23IT038
 
 | Deliverable | URL |
 |---|---|
-| Live demo | https://app.puretrovey.net/ |
+| Live PWA | https://app.puretrovey.net/ |
+| Fallback | https://trovey.pages.dev/ |
 | GitHub | https://github.com/minhduy6868/MOB-Survey |
-| Technical report | [docs/Mini-Project-1-Technical-Report.pdf](docs/Mini-Project-1-Technical-Report.pdf) |
+| Week 3 report | [docs/Mini-Project-1-Technical-Report.pdf](docs/Mini-Project-1-Technical-Report.pdf) |
 
-PWA phỏng vấn hiện trường về thói quen giao dịch. Phiếu lưu local bằng Hive (IndexedDB trên web). Khi có mạng, client gửi `POST /api/sync` vào Cloudflare KV. Google Sheet đọc `GET /api/records`.
+PWA phỏng vấn hiện trường. Phiếu lưu Hive (IndexedDB trên web). Có mạng thì `POST /api/sync` vào Cloudflare KV.
 
-## Chạy local
+Week 5: cùng web app đó chạy trong vỏ Capacitor (Android). Sync, form, Hive không đổi. Đổi 3 API phần cứng: Camera, Geolocation, Filesystem + thông báo khi sync xong.
 
-Cần Flutter SDK.
+## Chạy PWA (Chrome)
 
 ```bash
 cd app
 flutter pub get
-flutter run -d chrome
-```
-
-Máy local không chạy Functions. Muốn sync lên cloud:
-
-```bash
 flutter run -d chrome --dart-define=SYNC_URL=https://app.puretrovey.net/api/sync
 ```
+
+## Capacitor Android (Week 5)
+
+Cần Flutter SDK + Android SDK.
+
+```bash
+npm install
+cd app
+flutter build web --release --base-href /
+cd ..
+npx cap sync android
+npx cap open android
+```
+
+Hoặc APK debug:
+
+```bash
+cd android
+.\gradlew.bat assembleDebug
+```
+
+File ra: `android/app/build/outputs/apk/debug/app-debug.apk`
+
+Trên máy: cấp quyền Camera, Vị trí, Thông báo. Chụp ảnh / lấy GPS / gửi phiếu khi mất mạng rồi bật mạng.
+
+| Plugin | Thay | File |
+|---|---|---|
+| `@capacitor/camera` | `image_picker` / file input | `app/web/native.js` → `InstallBridge.takePhoto` |
+| `@capacitor/geolocation` | `navigator.geolocation` | `InstallBridge.captureGps` |
+| `@capacitor/filesystem` | (mới) | lưu JPEG vào `DATA/photos/` trước khi Hive |
+| `@capacitor/local-notifications` | Web Push | thông báo khi `synced` |
+
+PWA trên trình duyệt vẫn dùng `image_picker` / `geolocator`. Capacitor chỉ khi `Capacitor.isNativePlatform()`.
+
+`@capacitor/push-notifications` cần Firebase (`google-services.json`). Lab dùng Local Notifications cho cùng mục: báo khi sync xong, app không cần mở trình duyệt.
 
 ## Cấu trúc
 
 ```
 app/lib/             UI, Hive, hàng đợi sync
-app/web/             manifest.json, sw.js, icon
+app/web/             manifest, sw.js, native.js
+android/             project Capacitor (Android Studio)
 functions/api/       /api/sync, /api/records
-sheets/Code.gs       kéo dữ liệu KV vào Sheet
+sheets/Code.gs       kéo KV vào Sheet
+capacitor.config.json
 ```
 
-## Offline và cache
+## Offline (PWA)
 
 | Thành phần | Vị trí |
 |---|---|
-| Manifest `display: standalone` | `app/web/manifest.json` |
-| Service Worker | `app/web/sw.js` (`trovey-shell-v9`) |
-| Cache-First | shell, JS, icon |
-| Network-First | `/survey-template.json` |
-| Stale-While-Revalidate | `/sw-stats.json` |
-| Cache-Only | `/offline` |
-| Network-Only | `/api/*` |
-| Hive | box `tickets-v3`, `settings`, `meta` |
-| Background Sync | tag `trovey-sync` |
+| Manifest standalone | `app/web/manifest.json` |
+| Service Worker | `app/web/sw.js` (`trovey-shell-v10`) |
+| Hive | `tickets-v3` |
+| Native shell | Capacitor, không đăng ký SW |
 
-Chrome DevTools → Application: Manifest, Service Workers, Cache Storage, IndexedDB.
-
-## Deploy
+## Deploy web
 
 Không commit token.
 
@@ -64,19 +88,9 @@ cd ..
 npx wrangler pages deploy app/build/web --project-name trovey
 ```
 
-Chạy từ thư mục gốc để Wrangler biên dịch `functions/`.
-
 ## Google Sheet
 
 1. Dán `sheets/Code.gs` vào Apps Script.
 2. Chạy `beautifyAndSync`.
-3. (Tuỳ chọn) `installTrigger`.
 
 CSV: https://app.puretrovey.net/api/records?format=csv
-
-## Android (ngoài phạm vi tuần 3)
-
-```bash
-cd app
-flutter build apk --release --split-per-abi --dart-define=SYNC_URL=https://app.puretrovey.net/api/sync
-```

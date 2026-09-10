@@ -1,57 +1,37 @@
-# Trovey — Week 3 PWA
+# Trovey — Week 3 PWA + Week 5 Capacitor
 
 **Môn:** Cross-Platform Mobile App Development (VKU)  
-**Tuần:** 3 — Progressive Web Apps  
-**Sản phẩm:** PWA offline-first phỏng vấn thói quen giao dịch trên thế giới
+**Sinh viên:** Nguyễn Minh Duy · 23IT038
 
 **Live:** https://app.puretrovey.net/  
+**Fallback:** https://trovey.pages.dev/  
 **Repo:** https://github.com/minhduy6868/MOB-Survey
 
-## Mục tiêu
+## Week 3 — PWA (đã khóa)
 
-Người đi hiện trường mở app trên điện thoại, cài ra màn hình chính, điền phiếu khi mất mạng, lưu nháp, rồi đồng bộ khi có mạng.
+Phiếu phỏng vấn thói quen giao dịch. Offline Hive, sync Cloudflare KV.
 
-## Chủ đề (đã khóa)
+- Manifest standalone, icon 192/512
+- SW install → activate → fetch, đủ 5 chiến lược cache
+- Hàng đợi `draft | queued | syncing | synced | failed`
 
-| | |
-|---|---|
-| Tên | Trovey |
-| Đối tượng | Một phiếu phỏng vấn người giao dịch |
-| Câu hỏi | Nơi gặp, hồ sơ, thị trường, phong cách, giờ, sàn, cắt lỗ, nguồn tin, khó khăn |
-| Ảnh / GPS | Tuỳ chọn |
-| Người điều tra | Nguyễn Minh Duy · minhduyy.id.vn · 23IT038 |
+## Week 5 — Capacitor
 
-## PWA phải có
+Không viết lại app. Bọc `app/build/web` trong Android WebView.
 
-- Web App Manifest, `display: standalone`, icon 192 + 512 (kể cả maskable)
-- Service Worker: `install` → `activate` → `fetch`
-- Đủ 5 chiến lược: cache-first, network-first, stale-while-revalidate, cache-only, network-only
-- Hive / IndexedDB cho phiếu và cài đặt
-- Hàng đợi gửi (`queued` → `synced` / `failed`) + Background Sync
-- HTTPS
+1. `npx cap add android` — project `android/`
+2. Camera plugin thay file / `image_picker` khi chạy native
+3. Geolocation plugin thay `navigator.geolocation` khi chạy native
+4. Filesystem ghi ảnh vào máy trước sync
+5. Local Notifications khi phiếu `synced` (thay Web Push; FCM không có trong repo)
+6. `flutter build web && npx cap sync &&` APK debug
 
-## Luồng phiếu
+Động cơ sync, form, Hive giữ nguyên.
 
-1. Hiện trường — quốc gia, thành phố, nơi gặp, GPS, ảnh  
-2. Người được hỏi — họ tên (bắt buộc), SĐT, tuổi, số năm, thị trường, phong cách, giờ  
-3. Thói quen — sàn, cắt lỗ, nguồn tin, khó khăn, kết quả 3 tháng  
+## Demo trên máy Android
 
-Gửi → Hive → `POST /api/sync` → Cloudflare KV. Sheet kéo từ `GET /api/records`.
-
-## Stack đã chọn
-
-Flutter web · Hive · service worker viết tay · Cloudflare Pages + KV · Google Sheet (bản sao)
-
-Không dùng Vite/React. Android APK là bản thêm, không thay PWA.
-
-## Tiêu chí demo
-
-1. Mở HTTPS trên Chrome → Cài → icon standalone  
-2. Airplane mode → mở lại → form vẫn chạy  
-3. Nháp còn sau khi tắt app  
-4. Gửi offline → `queued` → bật mạng → `synced`  
-5. DevTools: Manifest, SW, Cache Storage, IndexedDB  
-
-## Ngoài phạm vi tuần 3
-
-Đăng nhập, dashboard admin, Web Push, Capacitor (tuần sau).
+1. Cài `app-debug.apk`
+2. Airplane mode → điền phiếu, chụp ảnh, lấy GPS
+3. Gửi → `queued`
+4. Bật mạng → `synced` + thông báo
+5. Settings hiện "Vỏ native (Capacitor)"

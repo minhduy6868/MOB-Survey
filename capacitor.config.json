@@ -1,0 +1,17 @@
+{
+  "appId": "net.puretrovey.trovey",
+  "appName": "Trovey",
+  "webDir": "app/build/web",
+  "android": {
+    "flavor": ""
+  },
+  "plugins": {
+    "Camera": {
+      "saveToGallery": false
+    },
+    "LocalNotifications": {
+      "smallIcon": "ic_launcher",
+      "iconColor": "#0E6E8A"
+    }
+  }
+}
