@@ -58,6 +58,7 @@ class TroveyStore extends ChangeNotifier {
     }
     if (kIsWeb) {
       InstallBridge.onDrain(() => unawaited(_hydrate()));
+      unawaited(InstallBridge.requestPermissions());
     }
     notifyListeners();
   }

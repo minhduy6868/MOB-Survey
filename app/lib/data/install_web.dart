@@ -25,6 +25,9 @@ external JSPromise<JSAny?> _getGps();
 @JS('troveyNotifySync')
 external JSPromise<JSAny?> _notifySync(JSString title, JSString body);
 
+@JS('troveyRequestPermissions')
+external JSPromise<JSAny?> _requestPermissions();
+
 @JS('troveyDownloadText')
 external void _download(JSString filename, JSString text);
 
@@ -90,6 +93,15 @@ class InstallBridge {
       return Map<String, dynamic>.from(jsonDecode(text) as Map);
     } catch (_) {
       return null;
+    }
+  }
+
+  static Future<void> requestPermissions() async {
+    if (!isNative) return;
+    try {
+      await _requestPermissions().toDart;
+    } catch (_) {
+      /* user denied or plugin missing */
     }
   }
 

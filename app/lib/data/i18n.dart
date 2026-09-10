@@ -69,6 +69,7 @@ const dict = <String, ({String vi, String en})>{
   'syncNotifyBody': (vi: 'Phiếu đã vào Cloudflare.', en: 'The record is in Cloudflare.'),
   'shellNative': (vi: 'Vỏ native (Capacitor)', en: 'Native shell (Capacitor)'),
   'shellWeb': (vi: 'Trình duyệt / PWA', en: 'Browser / PWA'),
+  'askPermissions': (vi: 'Xin quyền camera, GPS, thông báo', en: 'Ask camera, GPS, notification access'),
   'takePhoto': (vi: 'Chụp / chọn ảnh', en: 'Take / choose photo'),
   'removePhoto': (vi: 'Xóa ảnh', en: 'Remove photo'),
   'yes': (vi: 'Có', en: 'Yes'),

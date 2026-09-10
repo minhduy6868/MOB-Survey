@@ -2,9 +2,9 @@
    install → activate → fetch
    Cache-First | Network-First | Stale-While-Revalidate | Cache-Only | Network-Only
 */
-const SHELL = 'trovey-shell-v10';
-const RUNTIME = 'trovey-runtime-v10';
-const TEMPLATE = 'trovey-template-v10';
+const SHELL = 'trovey-shell-v11';
+const RUNTIME = 'trovey-runtime-v11';
+const TEMPLATE = 'trovey-template-v11';
 const CANONICAL = 'https://app.puretrovey.net';
 
 const PRECACHE = [

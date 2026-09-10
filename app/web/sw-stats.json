@@ -1,5 +1,5 @@
 {
   "app": "trovey",
-  "cache": "trovey-shell-v10",
+  "cache": "trovey-shell-v11",
   "strategies": ["cache-first", "network-first", "stale-while-revalidate", "cache-only", "network-only"]
 }

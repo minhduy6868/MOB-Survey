@@ -11,12 +11,28 @@
     }
   };
 
+  window.troveyRequestPermissions = async function () {
+    var pack = plugins();
+    if (!window.troveyIsNative() || !pack) return 'skip';
+    if (pack.Camera && pack.Camera.requestPermissions) {
+      await pack.Camera.requestPermissions({ permissions: ['camera', 'photos'] });
+    }
+    if (pack.Geolocation && pack.Geolocation.requestPermissions) {
+      await pack.Geolocation.requestPermissions();
+    }
+    if (pack.LocalNotifications && pack.LocalNotifications.requestPermissions) {
+      await pack.LocalNotifications.requestPermissions();
+    }
+    return 'ok';
+  };
+
   window.troveyTakePhoto = async function () {
     var pack = plugins();
     if (!window.troveyIsNative() || !pack || !pack.Camera) return null;
+    await window.troveyRequestPermissions();
     var photo = await pack.Camera.getPhoto({
       resultType: 'base64',
-      source: 'PROMPT',
+      source: 'CAMERA',
       quality: 70,
       width: 1280,
     });
@@ -40,6 +56,7 @@
   window.troveyGetGps = async function () {
     var pack = plugins();
     if (!window.troveyIsNative() || !pack || !pack.Geolocation) return null;
+    await window.troveyRequestPermissions();
     var pos = await pack.Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 15000 });
     if (!pos || !pos.coords) return null;
     return JSON.stringify({
@@ -53,7 +70,7 @@
   window.troveyNotifySync = async function (title, body) {
     var pack = plugins();
     if (!window.troveyIsNative() || !pack || !pack.LocalNotifications) return 'skip';
-    await pack.LocalNotifications.requestPermissions();
+    await window.troveyRequestPermissions();
     await pack.LocalNotifications.schedule({
       notifications: [
         {
@@ -65,4 +82,11 @@
     });
     return 'ok';
   };
+
+  function bootPermissions() {
+    window.troveyRequestPermissions().catch(function () {});
+  }
+
+  if (document.readyState === 'complete') bootPermissions();
+  else window.addEventListener('load', bootPermissions);
 })();

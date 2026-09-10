@@ -24,7 +24,7 @@ flutter run -d chrome --dart-define=SYNC_URL=https://app.puretrovey.net/api/sync
 
 ## Capacitor Android (Week 5)
 
-Cần Flutter SDK + Android SDK.
+Cần Flutter SDK, Android SDK, và **JDK 21** (Capacitor 7). Máy đang JDK 17 sẽ lỗi `invalid source release: 21`.
 
 ```bash
 npm install

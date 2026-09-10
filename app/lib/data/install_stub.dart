@@ -16,5 +16,7 @@ class InstallBridge {
 
   static Future<Map<String, dynamic>?> captureGps() async => null;
 
+  static Future<void> requestPermissions() async {}
+
   static Future<void> notifySync(String title, String body) async {}
 }

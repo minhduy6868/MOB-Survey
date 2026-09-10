@@ -101,6 +101,15 @@ class SettingsScreen extends StatelessWidget {
         const SizedBox(height: TroveySpace.md),
         InstallCard(store: store),
         const SizedBox(height: TroveySpace.md),
+        if (InstallBridge.isNative)
+          Padding(
+            padding: const EdgeInsets.only(bottom: TroveySpace.md),
+            child: FilledButton.icon(
+              onPressed: () => InstallBridge.requestPermissions(),
+              icon: const Icon(Icons.lock_open),
+              label: Text(store.t('askPermissions')),
+            ),
+          ),
         OutlinedButton.icon(
           onPressed: () => _export(context),
           icon: const Icon(Icons.download),
