@@ -1,12 +1,25 @@
-# Trovey
+# Trovey (Flutter)
+
+**Nhánh này là bản Flutter.** Repo có hai lựa chọn:
+
+| Bản | Nhánh | Live |
+|---|---|---|
+| **PWA HTML/JS** | `main` | https://pwa.puretrovey.net/ |
+| **PWA Flutter** (đây) | `mob-flutter` | https://app.puretrovey.net/ |
+
+Cùng một phiếu, cùng `POST /api/sync`. Muốn bản không cần Flutter SDK thì `git checkout main`.
+
+---
 
 **Course:** Cross-Platform Mobile App Development (VKU)  
 **Student:** Nguyễn Minh Duy — 23IT038
 
 | Deliverable | URL |
 |---|---|
-| Live PWA | https://app.puretrovey.net/ |
-| Fallback | https://trovey.pages.dev/ |
+| Live PWA (Flutter, nhánh này) | https://app.puretrovey.net/ |
+| Live PWA (HTML/JS, nhánh `main`) | https://pwa.puretrovey.net/ |
+| Fallback Flutter | https://trovey.pages.dev/ |
+| Fallback HTML/JS | https://trovey-pwa.pages.dev/ |
 | GitHub | https://github.com/minhduy6868/MOB-Survey |
 | Week 3 report | [docs/Mini-Project-1-Technical-Report.pdf](docs/Mini-Project-1-Technical-Report.pdf) |
 
