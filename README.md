@@ -25,7 +25,8 @@ git checkout mob-flutter
 ```
 
 GitHub: https://github.com/minhduy6868/MOB-Survey  
-Báo cáo tuần 3: [docs/Mini-Project-1-Technical-Report.pdf](docs/Mini-Project-1-Technical-Report.pdf)
+Báo cáo tuần 3: [docs/Mini-Project-1-Technical-Report.pdf](docs/Mini-Project-1-Technical-Report.pdf)  
+Báo cáo tuần 5: [docs/Mini-Project-2-Technical-Report.pdf](docs/Mini-Project-2-Technical-Report.pdf)
 
 Week 5: cùng web app chạy trong vỏ Capacitor (Android). Sync và form không đổi. Plugin native: Camera, Geolocation, Filesystem, Local Notifications.
 
@@ -107,7 +108,7 @@ Folder `app/` vẫn là mã Flutter (để đối chiếu). Nhánh làm việc c
 | Thành phần | Vị trí |
 |---|---|
 | Manifest standalone | `pwa/manifest.json` |
-| Service Worker | `pwa/sw.js` (`trovey-pwa-shell-v9`) |
+| Service Worker | `pwa/sw.js` (`trovey-pwa-shell-v10`) |
 | IndexedDB | `trovey-pwa` / `tickets` |
 | Native shell | Capacitor, không đăng ký SW |
 

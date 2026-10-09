@@ -44,6 +44,7 @@ pwa/downloads/*
 app/assets/brand/lockup.png
 DESIGN.md
 docs/evidence/
+docs/evidence-w5/
 docs/build_report.py
 
 # Android local / generated

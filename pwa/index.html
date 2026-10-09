@@ -22,7 +22,7 @@
   <link rel="preload" href="fonts/be-vietnam-pro-400-vi.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="fonts/be-vietnam-pro-700-vi.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="icons/icon.svg" as="image" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=10" />
   <style>
     #splash {
       position: fixed; inset: 0; z-index: 80;
@@ -51,11 +51,17 @@
     <span>Phiếu hiện trường</span>
   </div>
   <div id="app" class="app"></div>
-  <script src="data.js"></script>
-  <script src="native.js"></script>
-  <script src="app.js"></script>
+  <script src="data.js?v=10"></script>
+  <script src="native.js?v=10"></script>
+  <script src="app.js?v=10"></script>
   <script>
     if ('serviceWorker' in navigator) {
+      var reloading = false;
+      navigator.serviceWorker.addEventListener('controllerchange', function () {
+        if (reloading) return;
+        reloading = true;
+        location.reload();
+      });
       window.addEventListener('load', function () {
         var native = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
         if (native) return;

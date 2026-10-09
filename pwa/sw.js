@@ -2,7 +2,7 @@
    install → activate → fetch
    Cache-First | Network-First | Stale-While-Revalidate | Cache-Only | Network-Only
 */
-const SHELL = 'trovey-pwa-shell-v9';
+const SHELL = 'trovey-pwa-shell-v10';
 const RUNTIME = 'trovey-pwa-runtime-v1';
 const TEMPLATE = 'trovey-pwa-template-v1';
 

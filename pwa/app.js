@@ -640,7 +640,7 @@ function renderResults() {
         <p class="lead">${esc(insight)}</p>
         <div class="kpis">
           <div><strong>${submitted.length}</strong><span>phiếu</span></div>
-          <div><strong>${synced.length}</strong><span>đã gửi</span></div>
+          <div><strong>${synced.length}</strong><span>đã lên mây</span></div>
           <div><strong>${pending.length}</strong><span>chờ / lỗi</span></div>
           <div><strong>${avgHours(submitted)}</strong><span>giờ/tuần TB</span></div>
         </div>
